@@ -12,8 +12,8 @@ export class AppComponent {
   constructor(private http: HttpClient) { }
 
   ngOnInit() {
-    let character = this.http.get('https://swapi.co/api/people/1');
-    let characterHomeworld = this.http.get('https://swapi.co/api/planets/1');
+    let character = this.http.get('https://swapi.dev/api/people/1/');
+    let characterHomeworld = this.http.get('https://swapi.dev/api/planets/1/');
 
     forkJoin([character, characterHomeworld]).subscribe(results => {
       // results[0] is our character
