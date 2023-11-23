@@ -1,16 +1,42 @@
-import './polyfills';
+import { Component } from '@angular/core';
+import { bootstrapApplication } from '@angular/platform-browser';
+import { HttpClient, HttpClientModule } from '@angular/common/http';
+import { forkJoin } from 'rxjs';
+import 'zone.js';
+import { FormsModule } from '@angular/forms';
+import { CommonModule } from '@angular/common';
 
-import { enableProdMode } from '@angular/core';
-import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';
+@Component({
+  selector: 'app-root',
+  standalone: true,
+  imports: [CommonModule, FormsModule, HttpClientModule],
+  template: `
+    <h1>Angular Multiple HTTP Requests with RxJS</h1>
 
-import { AppModule } from './app/app.module';
+    <p>
+      <a href="https://coryrylan.com/blog/angular-multiple-http-requests-with-rxjs">Tutorial at coryrylan.com</a>
+    </p>
 
-platformBrowserDynamic().bootstrapModule(AppModule).then(ref => {
-  // Ensure Angular destroys itself on hot reloads.
-  if (window['ngRef']) {
-    window['ngRef'].destroy();
+    <pre>
+      {{loadedCharacter | json}}
+    </pre>
+  `,
+})
+export class App {
+  loadedCharacter!: {};
+  constructor(private http: HttpClient) { }
+
+  ngOnInit() {
+    let character = this.http.get('https://swapi.dev/api/people/1/');
+    let characterHomeworld = this.http.get('https://swapi.dev/api/planets/1/');
+
+    forkJoin([character, characterHomeworld]).subscribe(results => {
+      // results[0] is our character
+      // results[1] is our character homeworld
+      (results[0] as any).homeworld = results[1];
+      this.loadedCharacter = results[0];
+    });
   }
-  window['ngRef'] = ref;
+}
 
-  // Otherise, log the boot error
-}).catch(err => console.error(err));
+bootstrapApplication(App);
